@@ -9,7 +9,7 @@ namespace PathFinding
 {
     class GeneticAlgorithm
     {
-        private const int GENERATION_LIMIT = 30;
+        private const int GENERATION_LIMIT = 100;
         private int _currentGeneration;
         private IGenetic Genetic;
 
@@ -29,12 +29,13 @@ namespace PathFinding
         private void NewGeneration()
         {
             Genetic.Selection();
-            Genetic.Reproduction();
-            Genetic.Mutation();
 
             Debug.WriteLine($"=> Generation {_currentGeneration}");
             Genetic.DisplayGeneration();
             Debug.WriteLine("");
+
+            Genetic.Reproduction();
+            Genetic.Mutation();
 
             if (_currentGeneration++ < GENERATION_LIMIT)
             {

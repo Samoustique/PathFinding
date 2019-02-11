@@ -18,9 +18,9 @@ namespace PathFinding
             _moves = new List<Direction>(MoveCount);
         }
 
-        public Individual(int moveCount, List<Direction> moves) : this(moveCount)
+        public Individual(int moveCount, IEnumerable<Direction> moves) : this(moveCount)
         {
-            _moves = moves;
+            _moves = moves.ToList();
         }
 
         internal void GenerateRandom()
@@ -29,28 +29,15 @@ namespace PathFinding
 
             for (int i = 0; i < MoveCount; ++i)
             {
-                Direction randomValue = (Direction) directions.GetValue(GetRandomNumber(directions.Length));
+                // TODELETE
+                int test = _rand.Next(directions.Length);
+                Direction randomValue = (Direction) directions.GetValue(test);
                 _moves.Add(randomValue);
             }
         }
 
-        private static readonly Random getrandom = new Random();
-
-        public static int GetRandomNumber(int max)
-        {
-            lock (getrandom)
-            {
-                return getrandom.Next(max);
-            }
-        }
-
-        public static int GetRandomNumber(int min, int max)
-        {
-            lock (getrandom)
-            {
-                return getrandom.Next(min, max);
-            }
-        }
+        private static readonly int RANDOM_SEED = 99;
+        private static readonly Random _rand = new Random();// (RANDOM_SEED);
 
         internal IEnumerator GetEnumerator()
         {
@@ -72,15 +59,16 @@ namespace PathFinding
             List<Individual> inviduals = new List<Individual>(childrenCount);
             for (int i = 0; i < childrenCount; ++i)
             {
-                List<Direction> moves = new List<Direction>(parent1.MoveCount);
+                int[] numberList = Enumerable.Range(0, parent1.MoveCount).OrderBy(x => _rand.Next()).ToArray();
+                Direction[] moves = numberList.Select(x => Direction.BOTTOM).ToArray();
 
-                for (int j = 0; j < parent1.MoveCount; ++j)
+                foreach(var randomID in numberList)
                 {
                     Individual parent;
-                    parent = (GetRandomNumber(1, 3) == 1) ? parent1 : parent2;
-                    moves.Add(parent.GetMoveAt(j));
+                    parent = (_rand.Next(1, 3) == 1) ? parent1 : parent2;
+                    moves[randomID] = parent.GetMoveAt(randomID);
                 }
-
+                
                 inviduals.Add(new Individual(parent1.MoveCount, moves));
             }
 
@@ -89,26 +77,15 @@ namespace PathFinding
 
         internal void Mutate(float rate)
         {
-            int changingDirectionCount = (int)(MoveCount * rate);
-            List<int> randomIndexes = new List<int>(changingDirectionCount);
-            var directions = Enum.GetValues(typeof(Direction));
-
-            for (int i = 0; i < changingDirectionCount; ++i)
+            for (int i = 0; i < _moves.Count; ++i)
             {
-                int random = GetRandomNumber(0, MoveCount);
-                while(randomIndexes.Contains(random))
+                if(_rand.Next(100) < (int)(rate * 100))
                 {
-                    random = GetRandomNumber(0, MoveCount);
-                }
+                    var directions = Enum.GetValues(typeof(Direction)).OfType<Direction>().Except(new Direction[] { _moves[i] }).ToArray();
 
-                Direction randomDirection = (Direction)directions.GetValue(GetRandomNumber(directions.Length));
-                while(randomDirection == _moves[random])
-                {
-                    randomDirection = (Direction)directions.GetValue(GetRandomNumber(directions.Length));
+                    Direction randomDirection = (Direction)directions.GetValue(_rand.Next(directions.Length));
+                    _moves[i] = randomDirection;
                 }
-
-                _moves[random] = randomDirection;
-                randomIndexes.Add(random);
             }
         }
 

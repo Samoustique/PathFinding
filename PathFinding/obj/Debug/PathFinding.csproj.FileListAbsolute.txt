@@ -1,7 +1,0 @@
-C:\Users\Samoustique\source\repos\PathFinding.vs2017\PathFinding\bin\Debug\PathFinding.exe.config
-C:\Users\Samoustique\source\repos\PathFinding.vs2017\PathFinding\bin\Debug\PathFinding.exe
-C:\Users\Samoustique\source\repos\PathFinding.vs2017\PathFinding\bin\Debug\PathFinding.pdb
-C:\Users\Samoustique\source\repos\PathFinding.vs2017\PathFinding\obj\Debug\PathFinding.csprojAssemblyReference.cache
-C:\Users\Samoustique\source\repos\PathFinding.vs2017\PathFinding\obj\Debug\PathFinding.csproj.CoreCompileInputs.cache
-C:\Users\Samoustique\source\repos\PathFinding.vs2017\PathFinding\obj\Debug\PathFinding.exe
-C:\Users\Samoustique\source\repos\PathFinding.vs2017\PathFinding\obj\Debug\PathFinding.pdb

@@ -18,7 +18,7 @@ namespace PathFinding
 
     class PathFindingGenetic : IGenetic
     {
-        private const int POPULATION_COUNT = 100;
+        private const int POPULATION_COUNT = 1000;
         private const int INDIVIDUAL_MOVE_COUNT = 50;
         private const float SURVIVOR_RATE = 0.2f;
         private const float MUTATION_RATE = 0.1f;
@@ -34,7 +34,7 @@ namespace PathFinding
         private const char WALL = '#';
         private readonly char[,] _map =
         {
-            {'#', '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
+            {WALL, '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
             {'-', '-', '-', '-', '-', '-', WALL, '-', '-', '-'},
@@ -45,6 +45,20 @@ namespace PathFinding
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'}
         };
+
+        /*private readonly char[,] _map =
+        {
+            {WALL, '-', '-', '-', '-', '-', '-', '-', '-', '-'},
+            {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
+            {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
+            {'-', '-', '-','-', '-', '-',  '-', '-', '-', '-'},
+            {'-', '-', '-','-', '-', '-',  '-', '-', '-', '-'},
+            {'-', '-', '-','-', '-', '-',  '-', '-', '-', '-'},
+            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'},
+            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'},
+            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'},
+            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'}
+        };*/
 
         private Dictionary<Individual, Fitness> _generation;
 
@@ -86,13 +100,6 @@ namespace PathFinding
                     _generation.Add(child, null);
                 }
             }
-
-            // TODELETE
-            if(_generation.Count < POPULATION_COUNT)
-            {
-                int kk = 0;
-                ++kk;
-            }
         }
 
         private void CreateRandomIndividuals(int count)
@@ -127,8 +134,7 @@ namespace PathFinding
             int keepingCount = (int) (SURVIVOR_RATE * POPULATION_COUNT);
             if (_generation.Count > keepingCount)
             {
-                var tmp = _generation.Take(keepingCount).ToDictionary(x => x.Key, x => x.Value);
-                _generation = tmp.ToDictionary(pair => pair.Key, pair => pair.Value);
+                _generation = _generation.Take(keepingCount).ToDictionary(x => x.Key, x => x.Value);
             }
         }
 
@@ -138,7 +144,14 @@ namespace PathFinding
                          .Select(pair => pair.Key)
                          .ToList();
 
-            if(individualsToRemove.Count < _generation.Count)
+            if(individualsToRemove.Count == _generation.Count)
+            {
+                var tmp = from pair in _generation
+                          orderby pair.Value.TotalSquareDistanceAverage ascending
+                          select pair;
+                _generation = tmp.ToDictionary(pair => pair.Key, pair => pair.Value);
+            }
+            else
             {
                 foreach (var individualToRemove in individualsToRemove)
                 {
@@ -146,16 +159,19 @@ namespace PathFinding
                 }
 
                 var tmp = from pair in _generation
-                          orderby pair.Value.MovesCount ascending
+                          orderby pair.Value.TotalSquareDistanceAverage ascending
                           select pair;
                 _generation = tmp.ToDictionary(pair => pair.Key, pair => pair.Value);
             }
-            else
+
+            // Remove the individual with no fitness (which means they fail at the very first step)
+            var individualsWithNoFitness = _generation.Where(pair => pair.Value.TotalSquareDistanceAverage == null)
+                 .Select(pair => pair.Key)
+                 .ToList();
+
+            foreach (var individualWithNoFitness in individualsWithNoFitness)
             {
-                var tmp = from pair in _generation
-                          orderby pair.Value.MovesCount descending
-                          select pair;
-                _generation = tmp.ToDictionary(pair => pair.Key, pair => pair.Value);
+                _generation.Remove(individualWithNoFitness);
             }
         }
 
@@ -173,10 +189,12 @@ namespace PathFinding
             int currentX = START_X;
             int currentY = START_Y;
             int movesCount = 0;
+            int totalSquareDistance = 0;
             char[,] localMap = _map.Clone() as char[,];
             IEnumerator directionIterator = individual.GetEnumerator();
-            bool hasNext = directionIterator.MoveNext();
-            while (hasNext)
+            bool isReachingEnd = false;
+
+            while (directionIterator.MoveNext())
             {
                 Direction move = (Direction) directionIterator.Current;
 
@@ -213,7 +231,11 @@ namespace PathFinding
                         break;
                 }
 
-                if(wrongDirection)
+                int distanceX = MAP_WIDTH - currentX;
+                int distanceY = MAP_HEIGHT - currentY;
+                totalSquareDistance += ((distanceX * distanceX) + (distanceY * distanceY));
+
+                if (wrongDirection)
                 {
                     break;
                 }
@@ -221,15 +243,24 @@ namespace PathFinding
                 localMap[currentY, currentX] = WALL;
                 ++movesCount;
 
-                if(movesCount == MOVES_COUNT_LIMIT)
+                if(currentX == END_X && currentY == END_Y)
                 {
+                    isReachingEnd = true;
                     break;
                 }
 
-                hasNext = directionIterator.MoveNext();
+                if (movesCount == MOVES_COUNT_LIMIT)
+                {
+                    break;
+                }
             }
-            
-            return new Fitness(!hasNext, movesCount);
+
+            int? average = null;
+            if(movesCount > 0)
+            {
+                average = totalSquareDistance / movesCount;
+            }
+            return new Fitness(isReachingEnd, movesCount, average);
         }
 
         public void DisplayGeneration()
@@ -241,7 +272,7 @@ namespace PathFinding
                 string fitness = "";
                 if(entry.Value != null)
                 {
-                    fitness = $"{entry.Value.IsReachingEnd} {entry.Value.MovesCount} -";
+                    fitness = $"{entry.Value.IsReachingEnd} {entry.Value.TotalSquareDistanceAverage} {entry.Value.MoveCount} -";
                 }
                 Debug.WriteLine($"{i}: {fitness} {entry.Key.ToString()}");
             }
