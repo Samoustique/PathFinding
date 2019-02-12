@@ -8,8 +8,7 @@ namespace PathFinding
     public class AlgoViewModel: INotifyPropertyChanged
     {
         #region Properties
-        public char[] Map1D => Map2DToMap1D(_genetic.Map);
-        public char[] BestIndividualMap => Map2DToMap1D(_genetic.BestIndividualMap);
+        public char[] Map1D => PathFinding.Utils.Utils.Map2DToMap1D(_genetic.Map);
 
         public int PopulationSize
         {
@@ -87,11 +86,6 @@ namespace PathFinding
         {
             GeneticAlgorithm algo = new GeneticAlgorithm(_genetic);
             algo.Launch();
-        }
-
-        public char[] Map2DToMap1D(char[,] map)
-        {
-            return (from char x in map select x).ToArray();
         }
     }
 

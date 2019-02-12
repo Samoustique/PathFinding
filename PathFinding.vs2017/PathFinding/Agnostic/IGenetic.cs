@@ -28,10 +28,10 @@ namespace PathFinding
         {
             get;
         }
-        char[,] BestIndividualMap
+        /*char[,] BestIndividualMap
         {
             get;set;
-        }
+        }*/
 
         void GenerateFirstPopulation();
         void Mutation();

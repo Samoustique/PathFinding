@@ -23,7 +23,7 @@ namespace PathFinding
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new AlgoViewModel(new PathFindingGenetic());
+            DataContext = new AlgoViewModel(new PathFindingGeneration());
         }
     }
 }

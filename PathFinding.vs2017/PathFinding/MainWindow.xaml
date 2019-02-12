@@ -86,9 +86,7 @@
                 <ItemsControl ItemsSource="{Binding BestIndividualMap}" ItemContainerStyle="{StaticResource IndividualTemplate}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel Width="200">
-
-                            </WrapPanel>
+                            <WrapPanel Width="200"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>

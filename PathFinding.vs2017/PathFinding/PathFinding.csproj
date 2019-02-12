@@ -55,7 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ViewModel\CellsViewModel.cs" />
+    <Compile Include="ViewModel\GenerationViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -75,7 +75,7 @@
   <ItemGroup>
     <Compile Include="PathFinding\Fitness.cs" />
     <Compile Include="PathFinding\Individual.cs" />
-    <Compile Include="PathFinding\PathFindingGenetic.cs" />
+    <Compile Include="PathFinding\PathFindingGeneration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
