@@ -6,8 +6,33 @@ using System.Threading.Tasks;
 
 namespace PathFinding
 {
-    interface IGenetic
+    public interface IGenetic
     {
+        int PopulationSize
+        {
+            get; set;
+        }
+        int IndividualMoveCount
+        {
+            get; set;
+        }
+        float SurvivorRate
+        {
+            get; set;
+        }
+        float MutationRate
+        {
+            get; set;
+        }
+        char[,] Map
+        {
+            get;
+        }
+        char[,] BestIndividualMap
+        {
+            get;set;
+        }
+
         void GenerateFirstPopulation();
         void Mutation();
         void Reproduction();

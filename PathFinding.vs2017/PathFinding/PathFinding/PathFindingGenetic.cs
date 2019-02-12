@@ -18,11 +18,6 @@ namespace PathFinding
 
     class PathFindingGenetic : IGenetic
     {
-        private const int POPULATION_COUNT = 1000;
-        private const int INDIVIDUAL_MOVE_COUNT = 50;
-        private const float SURVIVOR_RATE = 0.2f;
-        private const float MUTATION_RATE = 0.1f;
-
         // MAP
         private const int START_X = 0;
         private const int START_Y = 0;
@@ -32,6 +27,11 @@ namespace PathFinding
         private const int MAP_HEIGHT = 10;
         private const int MOVES_COUNT_LIMIT = MAP_WIDTH * MAP_HEIGHT;
         private const char WALL = '#';
+        private const char WAY = 'W';
+
+        private Dictionary<Individual, Fitness> _generation;
+
+        public char[,] Map => _map;
         private readonly char[,] _map =
         {
             {WALL, '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
@@ -46,26 +46,26 @@ namespace PathFinding
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'}
         };
 
-        /*private readonly char[,] _map =
-        {
-            {WALL, '-', '-', '-', '-', '-', '-', '-', '-', '-'},
-            {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
-            {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-'},
-            {'-', '-', '-','-', '-', '-',  '-', '-', '-', '-'},
-            {'-', '-', '-','-', '-', '-',  '-', '-', '-', '-'},
-            {'-', '-', '-','-', '-', '-',  '-', '-', '-', '-'},
-            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'},
-            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'},
-            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'},
-            {'-', '-', '-', '-', '-', '-',  '-', '-', '-', '-'}
-        };*/
+        public char[,] BestIndividualMap { get => _bestIndividualMap; set => _bestIndividualMap = value; }
+        private char[,] _bestIndividualMap = new char[MAP_HEIGHT, MAP_WIDTH];
 
-        private Dictionary<Individual, Fitness> _generation;
+        public int PopulationSize { get => _populationSize; set => _populationSize = value; }
+        private int _populationSize;
 
+        public int IndividualMoveCount { get => _individualMoveCount; set => _individualMoveCount = value; }
+        private int _individualMoveCount;
+
+        public float SurvivorRate { get => _survivorRate; set => _survivorRate = value; }
+        private float _survivorRate;
+
+        public float MutationRate { get => _mutationRate; set => _mutationRate = value; }
+
+        private float _mutationRate;
+        
         public void GenerateFirstPopulation()
         {
-            _generation = new Dictionary<Individual, Fitness>(POPULATION_COUNT);
-            CreateRandomIndividuals(POPULATION_COUNT);
+            _generation = new Dictionary<Individual, Fitness>(PopulationSize);
+            CreateRandomIndividuals(PopulationSize);
         }
 
         public void Mutation()
@@ -74,14 +74,14 @@ namespace PathFinding
             {
                 if(entry.Value == null)
                 {
-                    entry.Key.Mutate(MUTATION_RATE);
+                    entry.Key.Mutate(MutationRate);
                 }
             }
         }
 
         public void Reproduction()
         {
-            int childrenCount = POPULATION_COUNT - _generation.Count;
+            int childrenCount = PopulationSize - _generation.Count;
 
             if (_generation.Count <= 1)
             {
@@ -106,7 +106,7 @@ namespace PathFinding
         {
             for (int i = 0; i < count; ++i)
             {
-                Individual individual = new Individual(INDIVIDUAL_MOVE_COUNT);
+                Individual individual = new Individual(IndividualMoveCount);
                 individual.GenerateRandom();
                 _generation.Add(individual, null);
             }
@@ -119,6 +119,65 @@ namespace PathFinding
             FitnessComputation();
             SortByFitness();
             KeepTheBest();
+            GenerateBestIndividualMap();
+        }
+
+        private void GenerateBestIndividualMap()
+        {
+            _bestIndividualMap = new char[MAP_HEIGHT, MAP_WIDTH];
+
+            int currentX = START_X;
+            int currentY = START_Y;
+            char[,] localMap = _map.Clone() as char[,];
+            IEnumerator directionIterator = _generation.First().Key.GetEnumerator();
+
+            while (directionIterator.MoveNext())
+            {
+                Direction move = (Direction)directionIterator.Current;
+
+                bool wrongDirection = false;
+                switch (move)
+                {
+                    case Direction.LEFT:
+                        wrongDirection = (currentX == 0 || localMap[currentY, currentX - 1] == WALL);
+                        if (!wrongDirection)
+                        {
+                            --currentX;
+                        }
+                        break;
+                    case Direction.UP:
+                        wrongDirection = (currentY == 0 || localMap[currentY - 1, currentX] == WALL);
+                        if (!wrongDirection)
+                        {
+                            --currentY;
+                        }
+                        break;
+                    case Direction.RIGHT:
+                        wrongDirection = (currentX == MAP_WIDTH - 1 || localMap[currentY, currentX + 1] == WALL);
+                        if (!wrongDirection)
+                        {
+                            ++currentX;
+                        }
+                        break;
+                    case Direction.BOTTOM:
+                        wrongDirection = (currentY == MAP_HEIGHT - 1 || localMap[currentY + 1, currentX] == WALL);
+                        if (!wrongDirection)
+                        {
+                            ++currentY;
+                        }
+                        break;
+                }
+
+                if (wrongDirection)
+                {
+                    break;
+                }
+
+                localMap[currentY, currentX] = WALL;
+                _bestIndividualMap[currentY, currentX] = WAY;
+            }
+
+            // TODO : faire en sorte de faire un RaisePropertyChanged(BestIndividualMap)
         }
 
         private void ClearFitness()
@@ -131,7 +190,7 @@ namespace PathFinding
 
         private void KeepTheBest()
         {
-            int keepingCount = (int) (SURVIVOR_RATE * POPULATION_COUNT);
+            int keepingCount = (int) (SurvivorRate * PopulationSize);
             if (_generation.Count > keepingCount)
             {
                 _generation = _generation.Take(keepingCount).ToDictionary(x => x.Key, x => x.Value);

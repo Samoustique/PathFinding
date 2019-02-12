@@ -6,19 +6,93 @@
         xmlns:local="clr-namespace:PathFinding"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-
     <Window.Resources>
-        <local:AlgoViewModel x:Key="algoviewmodel"/>
+        <Style x:Key="CellTemplate" TargetType="ContentPresenter">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Rectangle Stroke="Black" x:Name="Cell" Width="20" Height="20" Fill="Yellow"/>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="#">
+                                <Setter TargetName="Cell" Property="Fill" Value="Red"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="IndividualTemplate" TargetType="ContentPresenter">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Rectangle x:Name="IndividualCell" Width="20" Height="20" Fill="Transparent"/>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="W">
+                                <Setter TargetName="IndividualCell" Property="Fill" Value="Blue"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Grid>
+        
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
-                <TextBox Width="80" Text="{Binding Source={StaticResource algoviewmodel}, XPath=PopCount, Mode=TwoWay}" />
-            </StackPanel>
-            <Button Command="{Binding ClickCommand}" Width="70" Height="70" Content="LAUNCH"/>
-            <WrapPanel Width="500">
+                <Grid HorizontalAlignment="Left" Margin="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="40"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Population size" Margin="0, 0, 5, 0"/>
+                    <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="1000" LargeChange="100" Value="{Binding PopulationSize}" Width="180"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding PopulationSize}" Margin="0, 0, 5, 0"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Individual move count" Margin="0, 0, 5, 0"/>
+                    <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="50" LargeChange="10"  Value="{Binding IndividualMoveCount}" Width="180"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding IndividualMoveCount}" Margin="0, 0, 5, 0"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Survivor rate" Margin="0, 0, 5, 0"/>
+                    <Slider Grid.Row="2" Grid.Column="1" TickFrequency="0.1" LargeChange="0.1" IsSnapToTickEnabled="True" Minimum="0" Maximum="1" Value="{Binding SurvivorRate}" Width="180"/>
+                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding SurvivorRate}" Margin="0, 0, 5, 0"/>
+
+                    <TextBlock  Grid.Row="3" Grid.Column="0" Text="Mutation rate" Margin="0, 0, 5, 0"/>
+                    <Slider Grid.Row="3" Grid.Column="1" TickFrequency="0.1" LargeChange="0.1" IsSnapToTickEnabled="True" Minimum="0" Maximum="1" Value="{Binding MutationRate}" Width="180"/>
+                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding MutationRate}" Margin="0, 0, 5, 0"/>
+                </Grid>
                 
-            </WrapPanel>
+                <Button Command="{Binding ClickCommand}" Width="70" Height="70" Content="LAUNCH"/>
+            </StackPanel>
+
+            <Grid>
+                <ItemsControl ItemsSource="{Binding Map1D}" ItemContainerStyle="{StaticResource CellTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Width="200">
+                            
+                            </WrapPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+                <ItemsControl ItemsSource="{Binding BestIndividualMap}" ItemContainerStyle="{StaticResource IndividualTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Width="200">
+
+                            </WrapPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Grid>
         </StackPanel>
     </Grid>
 </Window>
