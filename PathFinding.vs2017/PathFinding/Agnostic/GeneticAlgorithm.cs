@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PathFinding
 {
     class GeneticAlgorithm
     {
-        private const int GENERATION_LIMIT = 100;
         private int _currentGeneration;
         private IGenetic Genetic;
+
+        public int GenerationCount { get; set; } = 30;
 
         public GeneticAlgorithm(IGenetic genetic)
         {
@@ -20,7 +17,9 @@ namespace PathFinding
 
         public void Launch()
         {
-            _currentGeneration = 0;
+            _currentGeneration = 1;
+
+            OnBestIndividualMapChanged(new GenerationChangedArgs($"Generation #{_currentGeneration}"));
 
             Genetic.GenerateFirstPopulation();
             NewGeneration();
@@ -37,9 +36,21 @@ namespace PathFinding
             Genetic.Reproduction();
             Genetic.Mutation();
 
-            if (_currentGeneration++ < GENERATION_LIMIT)
+            if (_currentGeneration++ < GenerationCount)
             {
                 NewGeneration();
+            }
+            OnBestIndividualMapChanged(new GenerationChangedArgs($"Generation #{_currentGeneration}"));
+        }
+
+        public event EventHandler<GenerationChangedArgs> GenerationChanged;
+
+        protected virtual void OnBestIndividualMapChanged(GenerationChangedArgs e)
+        {
+            EventHandler<GenerationChangedArgs> handler = GenerationChanged;
+            if (handler != null)
+            {
+                handler(this, e);
             }
         }
     }

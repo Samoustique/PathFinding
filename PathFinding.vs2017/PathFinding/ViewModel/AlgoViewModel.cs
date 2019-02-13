@@ -8,7 +8,35 @@ namespace PathFinding
     public class AlgoViewModel: INotifyPropertyChanged
     {
         #region Properties
-        public char[] Map1D => PathFinding.Utils.Utils.Map2DToMap1D(_genetic.Map);
+        public char[] Map1D => Map2DToMap1D(_genetic.Map);
+
+        private char[] _bestIndividualMap;
+        public char[] BestIndividualMap
+        {
+            get
+            {
+                return _bestIndividualMap;
+            }
+            set
+            {
+                _bestIndividualMap = value;
+                PropertyChanged(this, new PropertyChangedEventArgs(nameof(BestIndividualMap)));
+            }
+        }
+
+        private string _generationNumber;
+        public string GenerationNumber
+        {
+            get
+            {
+                return _generationNumber;
+            }
+            set
+            {
+                _generationNumber = value;
+                PropertyChanged(this, new PropertyChangedEventArgs(nameof(GenerationNumber)));
+            }
+        }
 
         public int PopulationSize
         {
@@ -61,31 +89,87 @@ namespace PathFinding
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MutationRate)));
             }
         }
+
+        public int GenerationCount
+        {
+            get
+            {
+                return _geneticAlgorithm.GenerationCount;
+            }
+            set
+            {
+                _geneticAlgorithm.GenerationCount = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GenerationCount)));
+            }
+        }
         #endregion
-        
+
         private IGenetic _genetic;
+        private GeneticAlgorithm _geneticAlgorithm;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public AlgoViewModel(IGenetic genetic)
         {
             _genetic = genetic;
+            _geneticAlgorithm = new GeneticAlgorithm(_genetic);
         }
 
-        private ICommand _clickCommand;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public ICommand ClickCommand
+        private ICommand _launchCommand;
+        public ICommand LaunchCommand
         {
             get
             {
-                return _clickCommand ?? (_clickCommand = new CommandHandler(() => MyAction(), true));
+                return _launchCommand ?? (_launchCommand = new CommandHandler(() => Launch(), true));
             }
         }
 
-        public void MyAction()
+        public void Launch()
         {
-            GeneticAlgorithm algo = new GeneticAlgorithm(_genetic);
-            algo.Launch();
+            _geneticAlgorithm.GenerationChanged += HandleGenerationChanged;
+            _geneticAlgorithm.Launch();
+        }
+
+        internal void HandleBestIndividualMapChanged(object sender, BestIndividualMapArgs e)
+        {
+            BestIndividualMap = Map2DToMap1D(e.BestIndividualMap);
+        }
+
+        internal void HandleGenerationChanged(object sender, GenerationChangedArgs e)
+        {
+            GenerationNumber = e.GenerationNumber;
+        }
+
+        public static char[] Map2DToMap1D(char[,] map)
+        {
+            return (from char x in map select x).ToArray();
+        }
+    }
+
+    public class BestIndividualMapArgs : EventArgs
+    {
+        private char[,] _bestIndividualMap;
+        public char[,] BestIndividualMap
+        {
+            get { return _bestIndividualMap; }
+        }
+
+        public BestIndividualMapArgs(char[,] bestIndividualMap)
+        {
+            this._bestIndividualMap = bestIndividualMap;
+        }
+    }
+
+    public class GenerationChangedArgs : EventArgs
+    {
+        private string _generationNumber;
+        public string GenerationNumber
+        {
+            get { return _generationNumber; }
+        }
+
+        public GenerationChangedArgs(string generationNumber)
+        {
+            this._generationNumber = generationNumber;
         }
     }
 

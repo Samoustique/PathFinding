@@ -1,11 +1,8 @@
-﻿using PathFinding.ViewModel;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PathFinding
 {
@@ -22,9 +19,11 @@ namespace PathFinding
         // MAP
         private const int START_X = 0;
         private const int START_Y = 0;
-        private static int END_X = GenerationViewModel.MAP_WIDTH - 1;
-        private static int END_Y = GenerationViewModel.MAP_HEIGHT - 1;
-        private static int MOVES_COUNT_LIMIT = GenerationViewModel.MAP_WIDTH * GenerationViewModel.MAP_HEIGHT;
+        public const int MAP_WIDTH = 10;
+        public const int MAP_HEIGHT = 10;
+        private const int END_X = MAP_WIDTH - 1;
+        private const int END_Y = MAP_HEIGHT - 1;
+        private const int MOVES_COUNT_LIMIT = MAP_WIDTH * MAP_HEIGHT;
         private const char WALL = '#';
         private const char WAY = 'W';
 
@@ -44,20 +43,24 @@ namespace PathFinding
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'}
         };
-        
-        public int PopulationSize { get; set; }
 
-        public int IndividualMoveCount { get; set; }
+        public int PopulationSize { get; set; } = 600;
 
-        public float SurvivorRate { get; set; }
+        public int IndividualMoveCount { get; set; } = 50;
 
-        public float MutationRate { get; set; }
+        public float SurvivorRate { get; set; } = 0.1f;
 
-        private GenerationViewModel _generationViewModel;
+        public float MutationRate { get; set; } = 0.1f;
 
-        public PathFindingGeneration()
+        public event EventHandler<BestIndividualMapArgs> BestIndividualMapChanged;
+
+        protected virtual void OnBestIndividualMapChanged(BestIndividualMapArgs e)
         {
-            _generationViewModel = new GenerationViewModel();
+            EventHandler<BestIndividualMapArgs> handler = BestIndividualMapChanged;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
         }
 
         public void GenerateFirstPopulation()
@@ -122,7 +125,7 @@ namespace PathFinding
 
         private void GenerateBestIndividualMap()
         {
-            char[,] bestIndividualMap = new char[GenerationViewModel.MAP_HEIGHT, GenerationViewModel.MAP_WIDTH];
+            char[,] bestIndividualMap = new char[MAP_HEIGHT, MAP_WIDTH];
 
             int currentX = START_X;
             int currentY = START_Y;
@@ -151,14 +154,14 @@ namespace PathFinding
                         }
                         break;
                     case Direction.RIGHT:
-                        wrongDirection = (currentX == GenerationViewModel.MAP_WIDTH - 1 || localMap[currentY, currentX + 1] == WALL);
+                        wrongDirection = (currentX == MAP_WIDTH - 1 || localMap[currentY, currentX + 1] == WALL);
                         if (!wrongDirection)
                         {
                             ++currentX;
                         }
                         break;
                     case Direction.BOTTOM:
-                        wrongDirection = (currentY == GenerationViewModel.MAP_HEIGHT - 1 || localMap[currentY + 1, currentX] == WALL);
+                        wrongDirection = (currentY == MAP_HEIGHT - 1 || localMap[currentY + 1, currentX] == WALL);
                         if (!wrongDirection)
                         {
                             ++currentY;
@@ -175,7 +178,7 @@ namespace PathFinding
                 bestIndividualMap[currentY, currentX] = WAY;
             }
 
-            _generationViewModel.BestIndividualMap = Utils.Utils.Map2DToMap1D(bestIndividualMap);
+            OnBestIndividualMapChanged(new BestIndividualMapArgs(bestIndividualMap));
         }
 
         private void ClearFitness()
@@ -273,14 +276,14 @@ namespace PathFinding
                         }
                         break;
                     case Direction.RIGHT:
-                        wrongDirection = (currentX == GenerationViewModel.MAP_WIDTH - 1 || localMap[currentY, currentX + 1] == WALL);
+                        wrongDirection = (currentX == MAP_WIDTH - 1 || localMap[currentY, currentX + 1] == WALL);
                         if (!wrongDirection)
                         {
                             ++currentX;
                         }
                         break;
                     case Direction.BOTTOM:
-                        wrongDirection = (currentY == GenerationViewModel.MAP_HEIGHT - 1 || localMap[currentY + 1, currentX] == WALL);
+                        wrongDirection = (currentY == MAP_HEIGHT - 1 || localMap[currentY + 1, currentX] == WALL);
                         if (!wrongDirection)
                         {
                             ++currentY;
@@ -288,8 +291,8 @@ namespace PathFinding
                         break;
                 }
 
-                int distanceX = GenerationViewModel.MAP_WIDTH - currentX;
-                int distanceY = GenerationViewModel.MAP_HEIGHT - currentY;
+                int distanceX = MAP_WIDTH - currentX;
+                int distanceY = MAP_HEIGHT - currentY;
                 totalSquareDistance += ((distanceX * distanceX) + (distanceY * distanceY));
 
                 if (wrongDirection)
