@@ -25,6 +25,8 @@ namespace PathFinding
         private const int END_Y = MAP_HEIGHT - 1;
         private const int MOVES_COUNT_LIMIT = MAP_WIDTH * MAP_HEIGHT;
         private const char WALL = '#';
+        private const char START = 'S';
+        private const char END = 'E';
         private const char WAY = 'W';
 
         private Dictionary<Individual, Fitness> _generation;
@@ -32,7 +34,7 @@ namespace PathFinding
         public char[,] Map => _map;
         private readonly char[,] _map =
         {
-            {WALL, '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
+            {START, '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', '-', '-', '-', '-'},
             {'-', '-', '-', '-', '-', '-', WALL, '-', '-', '-'},
@@ -41,7 +43,7 @@ namespace PathFinding
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'},
             {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'},
-            {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', '-'}
+            {'-', '-', WALL, '-', '-', '-', WALL, '-', '-', END}
         };
 
         public int PopulationSize { get; set; } = 600;
@@ -175,7 +177,11 @@ namespace PathFinding
                 }
 
                 localMap[currentY, currentX] = WALL;
-                bestIndividualMap[currentY, currentX] = WAY;
+
+                if (currentX != END_X || currentY != END_Y)
+                {
+                    bestIndividualMap[currentY, currentX] = WAY;
+                }
             }
 
             OnBestIndividualMapChanged(new BestIndividualMapArgs(bestIndividualMap));
@@ -300,14 +306,14 @@ namespace PathFinding
                     break;
                 }
 
-                localMap[currentY, currentX] = WALL;
                 ++movesCount;
-
-                if(currentX == END_X && currentY == END_Y)
+                if (localMap[currentY, currentX] == END)
                 {
                     isReachingEnd = true;
                     break;
                 }
+
+                localMap[currentY, currentX] = WALL;
 
                 if (movesCount == MOVES_COUNT_LIMIT)
                 {

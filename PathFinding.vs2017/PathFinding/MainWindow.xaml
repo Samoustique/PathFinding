@@ -16,6 +16,12 @@
                             <DataTrigger Binding="{Binding}" Value="#">
                                 <Setter TargetName="Cell" Property="Fill" Value="Red"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="S">
+                                <Setter TargetName="Cell" Property="Fill" Value="Cyan"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="E">
+                                <Setter TargetName="Cell" Property="Fill" Value="Cyan"/>
+                            </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </Setter.Value>

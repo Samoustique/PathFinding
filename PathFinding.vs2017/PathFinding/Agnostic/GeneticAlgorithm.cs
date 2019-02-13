@@ -28,11 +28,6 @@ namespace PathFinding
         private void NewGeneration()
         {
             Genetic.Selection();
-
-            Debug.WriteLine($"=> Generation {_currentGeneration}");
-            Genetic.DisplayGeneration();
-            Debug.WriteLine("");
-
             Genetic.Reproduction();
             Genetic.Mutation();
 
