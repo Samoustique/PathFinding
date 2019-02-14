@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace PathFinding
@@ -10,8 +11,8 @@ namespace PathFinding
         #region Properties
         public char[] Map1D => Map2DToMap1D(_genetic.Map);
 
-        private char[] _bestIndividualMap;
-        public char[] BestIndividualMap
+        private Direction[] _bestIndividualMap;
+        public Direction[] BestIndividualMap
         {
             get
             {
@@ -23,6 +24,21 @@ namespace PathFinding
                 PropertyChanged(this, new PropertyChangedEventArgs(nameof(BestIndividualMap)));
             }
         }
+
+        private bool _isReady = true;
+        public bool IsReady
+        {
+            get
+            {
+                return _isReady;
+            }
+            set
+            {
+                _isReady = value;
+                PropertyChanged(this, new PropertyChangedEventArgs(nameof(IsReady)));
+            }
+        }
+
 
         private string _generationNumber;
         public string GenerationNumber
@@ -112,6 +128,8 @@ namespace PathFinding
         {
             _genetic = genetic;
             _geneticAlgorithm = new GeneticAlgorithm(_genetic);
+            _geneticAlgorithm.GenerationChanged += HandleGenerationChanged;
+            _geneticAlgorithm.IsReadyChanged += HandleIsReadyChanged;
         }
 
         private ICommand _launchCommand;
@@ -119,14 +137,16 @@ namespace PathFinding
         {
             get
             {
-                return _launchCommand ?? (_launchCommand = new CommandHandler(() => Launch(), true));
+                return _launchCommand ?? (_launchCommand = new CommandHandler(() => Launch(), IsReady));
             }
         }
 
+        private Task _task;
+
         public void Launch()
         {
-            _geneticAlgorithm.GenerationChanged += HandleGenerationChanged;
-            _geneticAlgorithm.Launch();
+            IsReady = false;
+            _task = Task.Run(() => _geneticAlgorithm.Launch());
         }
 
         internal void HandleBestIndividualMapChanged(object sender, BestIndividualMapArgs e)
@@ -139,21 +159,45 @@ namespace PathFinding
             GenerationNumber = e.GenerationNumber;
         }
 
+        internal void HandleIsReadyChanged(object sender, IsReadyChangedArgs e)
+        {
+            IsReady = e.IsReady;
+        }
+
+        public static Direction[] Map2DToMap1D(Direction[,] map)
+        {
+            return (from Direction x in map select x).ToArray();
+        }
+
         public static char[] Map2DToMap1D(char[,] map)
         {
             return (from char x in map select x).ToArray();
         }
     }
 
+    public class IsReadyChangedArgs : EventArgs
+    {
+        private bool _isReady;
+        public bool IsReady
+        {
+            get { return _isReady; }
+        }
+
+        public IsReadyChangedArgs(bool isReady)
+        {
+            this._isReady = isReady;
+        }
+    }
+
     public class BestIndividualMapArgs : EventArgs
     {
-        private char[,] _bestIndividualMap;
-        public char[,] BestIndividualMap
+        private Direction[,] _bestIndividualMap;
+        public Direction[,] BestIndividualMap
         {
             get { return _bestIndividualMap; }
         }
 
-        public BestIndividualMapArgs(char[,] bestIndividualMap)
+        public BestIndividualMapArgs(Direction[,] bestIndividualMap)
         {
             this._bestIndividualMap = bestIndividualMap;
         }

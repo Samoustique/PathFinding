@@ -31,10 +31,26 @@
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <Rectangle x:Name="IndividualCell" Width="20" Height="20" Fill="Transparent"/>
+                        <Grid>
+                            <Rectangle x:Name="IndividualCellBackground" Width="20" Height="20" Fill="Transparent"/>
+                            <TextBlock x:Name="IndividualCellDirection" Width="20" Height="20" Text=""/>
+                        </Grid>
                         <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding}" Value="W">
-                                <Setter TargetName="IndividualCell" Property="Fill" Value="Blue"/>
+                            <DataTrigger Binding="{Binding}" Value="{x:Static local:Direction.LEFT }">
+                                <Setter TargetName="IndividualCellDirection" Property="Text" Value="˂"/>
+                                <Setter TargetName="IndividualCellBackground" Property="Fill" Value="Blue"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="{x:Static local:Direction.BOTTOM }">
+                                <Setter TargetName="IndividualCellDirection" Property="Text" Value="˅"/>
+                                <Setter TargetName="IndividualCellBackground" Property="Fill" Value="Blue"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="{x:Static local:Direction.UP }">
+                                <Setter TargetName="IndividualCellDirection" Property="Text" Value="˄"/>
+                                <Setter TargetName="IndividualCellBackground" Property="Fill" Value="Blue"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="{x:Static local:Direction.RIGHT }">
+                                <Setter TargetName="IndividualCellDirection" Property="Text" Value="˃"/>
+                                <Setter TargetName="IndividualCellBackground" Property="Fill" Value="Blue"/>
                             </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>
@@ -42,69 +58,67 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid>
-        
-        <StackPanel Orientation="Vertical" Margin="20">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Width="Auto">
-                <Grid HorizontalAlignment="Left" Margin="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="180"/>
-                        <ColumnDefinition Width="40"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="25"/>
-                    </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Generation count" Margin="0, 0, 5, 0"/>
-                    <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" LargeChange="10" Value="{Binding GenerationCount}" Width="180"/>
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding GenerationCount}" Margin="5, 0, 0, 0"/>
+    <DockPanel Margin="20">
+        <DockPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Width="Auto">
+            <Grid DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Population size" Margin="0, 0, 5, 0"/>
-                    <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1000" LargeChange="100" Value="{Binding PopulationSize}" Width="180"/>
-                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding PopulationSize}" Margin="5, 0, 0, 0"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Generation count" Margin="0, 0, 5, 0"/>
+                <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" LargeChange="10" Value="{Binding GenerationCount}" Width="180"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding GenerationCount}" Margin="5, 0, 0, 0"/>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Individual move count" Margin="0, 0, 5, 0"/>
-                    <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="50" LargeChange="10"  Value="{Binding IndividualMoveCount}" Width="180"/>
-                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding IndividualMoveCount}" Margin="5, 0, 0, 0"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Population size" Margin="0, 0, 5, 0"/>
+                <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1000" LargeChange="100" Value="{Binding PopulationSize}" Width="180"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding PopulationSize}" Margin="5, 0, 0, 0"/>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Survivor rate" Margin="0, 0, 5, 0"/>
-                    <Slider Grid.Row="3" Grid.Column="1" TickFrequency="0.1" LargeChange="0.1" IsSnapToTickEnabled="True" Minimum="0" Maximum="1" Value="{Binding SurvivorRate}" Width="180"/>
-                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding SurvivorRate}" Margin="5, 0, 0, 0"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Individual move count" Margin="0, 0, 5, 0"/>
+                <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="50" LargeChange="10"  Value="{Binding IndividualMoveCount}" Width="180"/>
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding IndividualMoveCount}" Margin="5, 0, 0, 0"/>
 
-                    <TextBlock  Grid.Row="4" Grid.Column="0" Text="Mutation rate" Margin="0, 0, 5, 0"/>
-                    <Slider Grid.Row="4" Grid.Column="1" TickFrequency="0.1" LargeChange="0.1" IsSnapToTickEnabled="True" Minimum="0" Maximum="1" Value="{Binding MutationRate}" Width="180"/>
-                    <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding MutationRate}" Margin="5, 0, 0, 0"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Survivor rate" Margin="0, 0, 5, 0"/>
+                <Slider Grid.Row="3" Grid.Column="1" TickFrequency="0.1" LargeChange="0.1" IsSnapToTickEnabled="True" Minimum="0" Maximum="1" Value="{Binding SurvivorRate}" Width="180"/>
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding SurvivorRate}" Margin="5, 0, 0, 0"/>
+
+                <TextBlock  Grid.Row="4" Grid.Column="0" Text="Mutation rate" Margin="0, 0, 5, 0"/>
+                <Slider Grid.Row="4" Grid.Column="1" TickFrequency="0.1" LargeChange="0.1" IsSnapToTickEnabled="True" Minimum="0" Maximum="1" Value="{Binding MutationRate}" Width="180"/>
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding MutationRate}" Margin="5, 0, 0, 0"/>
+            </Grid>
+
+            <StackPanel DockPanel.Dock="Right" Orientation="Vertical">
+                <Grid>
+                    <ItemsControl ItemsSource="{Binding Map1D}" ItemContainerStyle="{StaticResource CellTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Width="200">
+
+                                </WrapPanel>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding BestIndividualMap}" ItemContainerStyle="{StaticResource IndividualTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Width="200"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </Grid>
-
-                <StackPanel Orientation="Vertical">
-                    <Grid>
-                        <ItemsControl ItemsSource="{Binding Map1D}" ItemContainerStyle="{StaticResource CellTemplate}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Width="200">
-
-                                    </WrapPanel>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                        <ItemsControl ItemsSource="{Binding BestIndividualMap}" ItemContainerStyle="{StaticResource IndividualTemplate}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Width="200"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </Grid>
-                    <TextBlock Text="{Binding GenerationNumber, Mode=TwoWay}" Margin="15" TextWrapping="Wrap" TextAlignment="Center"/>
-                </StackPanel>
+                <TextBlock Text="{Binding GenerationNumber, Mode=TwoWay}" Margin="15" TextWrapping="Wrap" TextAlignment="Center"/>
             </StackPanel>
-            
-            <Button Command="{Binding LaunchCommand}" IsDefault="true" Content="LAUNCH" Margin="15"/>
-        </StackPanel>
-    </Grid>
+        </DockPanel>
+
+        <Button DockPanel.Dock="Bottom" Command="{Binding LaunchCommand}" IsDefault="true" Content="LAUNCH" Margin="15" IsEnabled="{Binding IsReady}"/>
+    </DockPanel>
 </Window>

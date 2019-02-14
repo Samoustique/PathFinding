@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace PathFinding
 {
@@ -18,11 +19,10 @@ namespace PathFinding
         public void Launch()
         {
             _currentGeneration = 1;
-
-            OnBestIndividualMapChanged(new GenerationChangedArgs($"Generation #{_currentGeneration}"));
-
+            
             Genetic.GenerateFirstPopulation();
             NewGeneration();
+            OnIsReadyChanged(new IsReadyChangedArgs(true));
         }
 
         private void NewGeneration()
@@ -31,11 +31,23 @@ namespace PathFinding
             Genetic.Reproduction();
             Genetic.Mutation();
 
+            OnBestIndividualMapChanged(new GenerationChangedArgs($"Generation #{_currentGeneration}"));
             if (_currentGeneration++ < GenerationCount)
             {
+                Thread.Sleep(100);
                 NewGeneration();
             }
-            OnBestIndividualMapChanged(new GenerationChangedArgs($"Generation #{_currentGeneration}"));
+        }
+
+        public event EventHandler<IsReadyChangedArgs> IsReadyChanged;
+
+        protected virtual void OnIsReadyChanged(IsReadyChangedArgs e)
+        {
+            EventHandler<IsReadyChangedArgs> handler = IsReadyChanged;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
         }
 
         public event EventHandler<GenerationChangedArgs> GenerationChanged;

@@ -29,9 +29,7 @@ namespace PathFinding
 
             for (int i = 0; i < MoveCount; ++i)
             {
-                // TODELETE
-                int test = _rand.Next(directions.Length);
-                Direction randomValue = (Direction) directions.GetValue(test);
+                Direction randomValue = (Direction) directions.GetValue(_rand.Next(1, directions.Length));
                 _moves.Add(randomValue);
             }
         }
@@ -65,7 +63,7 @@ namespace PathFinding
                 foreach(var randomID in numberList)
                 {
                     Individual parent;
-                    parent = (_rand.Next(1, 3) == 1) ? parent1 : parent2;
+                    parent = (_rand.Next(0, 2) == 1) ? parent1 : parent2;
                     moves[randomID] = parent.GetMoveAt(randomID);
                 }
                 
@@ -83,7 +81,7 @@ namespace PathFinding
                 {
                     var directions = Enum.GetValues(typeof(Direction)).OfType<Direction>().Except(new Direction[] { _moves[i] }).ToArray();
 
-                    Direction randomDirection = (Direction)directions.GetValue(_rand.Next(directions.Length));
+                    Direction randomDirection = (Direction)directions.GetValue(_rand.Next(1, directions.Length));
                     _moves[i] = randomDirection;
                 }
             }

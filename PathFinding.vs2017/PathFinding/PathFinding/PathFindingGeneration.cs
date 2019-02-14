@@ -8,7 +8,8 @@ namespace PathFinding
 {
     public enum Direction
     {
-        LEFT = 0,
+        NONE= 0,
+        LEFT,
         UP,
         RIGHT,
         BOTTOM
@@ -127,7 +128,7 @@ namespace PathFinding
 
         private void GenerateBestIndividualMap()
         {
-            char[,] bestIndividualMap = new char[MAP_HEIGHT, MAP_WIDTH];
+            Direction[,] bestIndividualMap = new Direction[MAP_HEIGHT, MAP_WIDTH];
 
             int currentX = START_X;
             int currentY = START_Y;
@@ -137,6 +138,7 @@ namespace PathFinding
             while (directionIterator.MoveNext())
             {
                 Direction move = (Direction)directionIterator.Current;
+                bestIndividualMap[currentY, currentX] = move;
 
                 bool wrongDirection = false;
                 switch (move)
@@ -171,17 +173,12 @@ namespace PathFinding
                         break;
                 }
 
-                if (wrongDirection)
+                if (wrongDirection || localMap[currentY, currentX] == END)
                 {
                     break;
                 }
 
                 localMap[currentY, currentX] = WALL;
-
-                if (currentX != END_X || currentY != END_Y)
-                {
-                    bestIndividualMap[currentY, currentX] = WAY;
-                }
             }
 
             OnBestIndividualMapChanged(new BestIndividualMapArgs(bestIndividualMap));
@@ -299,7 +296,7 @@ namespace PathFinding
 
                 int distanceX = MAP_WIDTH - currentX;
                 int distanceY = MAP_HEIGHT - currentY;
-                totalSquareDistance += ((distanceX * distanceX) + (distanceY * distanceY));
+                totalSquareDistance = ((distanceX * distanceX) + (distanceY * distanceY));
 
                 if (wrongDirection)
                 {
